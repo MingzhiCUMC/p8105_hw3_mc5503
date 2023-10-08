@@ -1,0 +1,93 @@
+---
+title: "p8105_hw3_mc5503"
+author: "mc5503"
+date: '2023-10-08'
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+data("instacart")
+```
+
+# Problem 1
+The size of the dataset is `r nrow(instacart)` *`r ncol(instacart)`. Each order contains serveral products. One product belongs to one aisle and one department. For example, order 1 is in Thursday, the customer bought `r nrow(instacart |> filter(order_id==1))` things.`r instacart$product_name[1]` belongs to `r instacart$aisle[1]` and the `r instacart$department[1]` department.
+```{r}
+str(instacart)
+```
+
+## analysis of aisle
+```{r}
+aisle_n=instacart|>
+  count(aisle,name="n_items")|>
+  arrange(desc(n_items))
+```
+There are total `r nrow(aisle_n)` aisles and the `r aisle_n$aisle[1]` aisle is the most items ordered from. 
+
+## number of items ordered in each aisle
+```{r}
+instacart |> 
+  count(aisle,name="n_items")|>
+  arrange(desc(n_items))|>
+  filter(n_items>10000)|>
+  mutate(aisle = forcats::fct_reorder(aisle, desc(n_items)))|>
+  ggplot(aes(y=n_items,x=aisle))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5))
+```
+
+fresh fruits and vegetables are the two most popular aisles. 
+
+## popular items
+```{r}
+bi=
+  instacart|>
+  filter(aisle=="baking ingredients")|>
+  count(product_name, name = "n_items")|>
+  arrange(desc(n_items))|>
+  head(n=3L)
+knitr::kable(bi)
+dfc=
+  instacart|>
+  filter(aisle=="dog food care")|>
+  count(product_name, name = "n_items")|>
+  arrange(desc(n_items))|>
+  head(n=3L)
+knitr::kable(dfc)
+pvf=
+  instacart|>
+  filter(aisle=="packaged vegetables fruits")|>
+  count(product_name, name = "n_items")|>
+  arrange(desc(n_items))|>
+  head(n=3L)
+knitr::kable(pvf)
+```
+
+The 3 most popular items in baking ingredients is `r bi$product_name`.The 3 most popular items in dog food care is `r dfc$product_name`. The 3 most popular items in packaged vegetables fruits is `r pvf$product_name`.
+
+##  mean hour of the day
+```{r}
+instacart|>
+  filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream"))|>
+  group_by(product_name,order_dow)|>
+  summarize(
+    mean_hour_of_the_day=mean(order_hour_of_day))|>
+  pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour_of_the_day
+  )|> 
+  rename("Sunday"="0","Monday"="1","Tuesday"="2","Wednesday"="3","Thursday"="4","Friday"="5","Saturdy"="6")|>
+  knitr::kable(digits = 1)
+```
+Use `group_by` and `summarize` to calculate the mean hour of the day for each day in one week. In average, the mean hour of the day of Coffee Ice Cream is longer.
+
+# Problem 2
+```{r}
+data("brfss_smart2010")
+```
+
