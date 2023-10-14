@@ -182,7 +182,9 @@ data_clean|>
   geom_boxplot()+
   facet_grid(.~sex)
 ```
-There are total `r data_clean|>filter(sex=="male")` male and `r data_clean|>filter(sex=="female")` female in the study. From the plot, it's obvious that the younger people tend to have higher education.
+
+There are total `r nrow(data_clean|>filter(sex=="male"))` male and `r nrow(data_clean|>filter(sex=="female"))` female in the study. From the plot, it's obvious that the younger people tend to have higher education.
+
 
 ## total activities plot
 ```{r}
@@ -204,10 +206,18 @@ data_clean|>
     names_to = "time",
     values_to = "activity"
   )|>
-  ggplot(aes(x=time,y=activity,color=sex))+
-  geom_point(alpha=0.5)+
+  separate(time,into = c("unit","minute"),sep = 3)|>
+  mutate(minute=as.numeric(minute))|>
+  ggplot(aes(x=minute,y=activity,color=sex))+
+  geom_point(alpha=0.1,size=0.1)+
   geom_smooth(se=FALSE)+
+  scale_x_continuous(
+    breaks = c(0, 480, 960,1440), 
+    #labels = c("-15ºC", "0", "15"),
+    limits = c(0,1440))+
   facet_grid(.~education)
-    
 ```
+
+From the plot, we can tell that in group of High school equivalent and More than high school, female have more activity than male. And people have more activity when it's 8am to 8 pm which is between 480 to 1200 minutes.
+
 
